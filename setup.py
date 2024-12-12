@@ -5,6 +5,7 @@ from aldryn_translation_tools import __version__
 
 
 REQUIREMENTS = [
+    'Django>=2.2,<5.0',
     'django-cms>=3.4.5',
     'django-parler>=1.9.2',
     'Unidecode>=1.0.23',
@@ -22,6 +23,7 @@ setup(
     packages=find_packages(exclude=['tests']),
     license='LICENSE.txt',
     platforms=['OS Independent'],
+    python_requires=">=3.8",
     install_requires=REQUIREMENTS,
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

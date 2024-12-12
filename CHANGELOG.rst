@@ -2,6 +2,12 @@
 Changelog
 =========
 
+0.3.1b1 (2024-12-12)
+====================
+
+* Added support for Django 3.0
+* Drop support for Python < 3.8
+
 0.3.0 (2018-12-18)
 ==================
 
