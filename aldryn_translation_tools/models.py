@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
-
-
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
 
-from cms.utils.i18n import get_current_language, get_default_language, get_fallback_languages
+from cms.utils.i18n import (
+    get_current_language,
+    get_default_language,
+    get_fallback_languages,
+)
 
 from slugify import slugify
 
 
-class TranslatedAutoSlugifyMixin(object):
+class TranslatedAutoSlugifyMixin:
     """
     This is a TranslatableModel mixin that automatically generates a suitable
     slug for the object on save.
@@ -36,19 +37,19 @@ class TranslatedAutoSlugifyMixin(object):
     # a lazy translated string here.
     slug_default = None
     # The translated slug field name.
-    slug_field_name = 'slug'
+    slug_field_name = "slug"
     # Flag controlling if slugs are unique per language or globally unique.
     slug_globally_unique = False
     # Max length of the slug. By default is determined by introspection.
     slug_max_length = None
     # The separator to use before any index.
-    slug_separator = '-'
+    slug_separator = "-"
     # The translated field to derive a slug from. If `get_slug_source()` is
     # overridden in the model, overriding `get_slug_default` is recommended.
     slug_source_field_name = None
     # filters that would be used to determine slug uniqueness, would be
     # populated with slug_field_name.
-    raw_slug_filter_string = 'translations__{0}'
+    raw_slug_filter_string = "translations__{0}"
 
     # python-slugify option for smart truncate
     word_boundary = False
@@ -74,11 +75,10 @@ class TranslatedAutoSlugifyMixin(object):
         # Introspect the field name
         try:
             trans_meta = self.translations.model._meta
-            source_field = trans_meta.get_field(
-                self.slug_source_field_name)
-            field_name = getattr(source_field, 'verbose_name')
+            source_field = trans_meta.get_field(self.slug_source_field_name)
+            field_name = getattr(source_field, "verbose_name")
         except Exception:
-            field_name = _('name')
+            field_name = _("name")
 
         slug_default = _("{0}-without-{1}").format(
             slugify(force_str(object_name)),
@@ -96,7 +96,7 @@ class TranslatedAutoSlugifyMixin(object):
         else:
             trans_meta = self.translations.model._meta
             slug_field = trans_meta.get_field(self.slug_field_name)
-            max_length = getattr(slug_field, 'max_length', 255)
+            max_length = getattr(slug_field, "max_length", 255)
             # All objects of this class will use the same value.
             slug_max_length = max_length
         if idx_len:
@@ -111,8 +111,7 @@ class TranslatedAutoSlugifyMixin(object):
         return getattr(self, self.slug_source_field_name, None)
 
     def _get_candidate_slug(self, slug, idx=0):
-        return "{slug}{sep}{idx}".format(
-            slug=slug, sep=self.slug_separator, idx=idx)
+        return "{slug}{sep}{idx}".format(slug=slug, sep=self.slug_separator, idx=idx)
 
     def _get_existing_slug(self):
         """
@@ -127,11 +126,13 @@ class TranslatedAutoSlugifyMixin(object):
         """
         if max_length is None:
             max_length = self.get_slug_max_length()
-        slug = slugify(text,
-                       max_length=max_length,
-                       word_boundary=self.word_boundary,
-                       save_order=self.save_order,
-                       separator=self.slug_separator)
+        slug = slugify(
+            text,
+            max_length=max_length,
+            word_boundary=self.word_boundary,
+            save_order=self.save_order,
+            separator=self.slug_separator,
+        )
         return slug
 
     def _get_ideal_slug(self):
@@ -161,8 +162,7 @@ class TranslatedAutoSlugifyMixin(object):
 
         qs = lookup_model.objects.language(language)
         if not self.slug_globally_unique:
-            qs = qs.filter(
-                translations__language_code=language)
+            qs = qs.filter(translations__language_code=language)
         if self.pk:
             qs = qs.exclude(pk=self.pk)
         return qs
@@ -177,8 +177,7 @@ class TranslatedAutoSlugifyMixin(object):
         if qs is None:
             qs = self._get_slug_queryset()
         if slug_filter is None:
-            slug_filter = self.raw_slug_filter_string.format(
-                self.slug_field_name)
+            slug_filter = self.raw_slug_filter_string.format(self.slug_field_name)
         return qs.filter(**{slug_filter: slug}).exists()
 
     def make_new_slug(self, slug=None, qs=None):
@@ -216,9 +215,10 @@ class TranslatedAutoSlugifyMixin(object):
         return super(TranslatedAutoSlugifyMixin, self).save(**kwargs)
 
 
-class TranslationHelperMixin(object):
-
-    def known_translation_getter(self, field, default=None, language_code=None, any_language=False):
+class TranslationHelperMixin:
+    def known_translation_getter(
+        self, field, default=None, language_code=None, any_language=False
+    ):
         """
         This is meant to act like HVAD/Parler's safe_translation_getter() but
         respects the fallback preferences as defined in
@@ -232,28 +232,33 @@ class TranslationHelperMixin(object):
         # settings match the CMS settings.
         try:
             object_languages = self.get_available_languages()
-            assert hasattr(object_languages, '__iter__')
+            assert hasattr(object_languages, "__iter__")
         except [KeyError, AssertionError]:
             raise ImproperlyConfigured(
                 "TranslationHelperMixin must be used with a model defining"
                 "get_available_languages() that returns a list of available"
-                "language codes. E.g., django-parler's TranslatableModel.")
+                "language codes. E.g., django-parler's TranslatableModel."
+            )
 
         language_code = (
-            language_code or get_current_language() or get_default_language())
-        site_id = getattr(settings, 'SITE_ID', None)
+            language_code or get_current_language() or get_default_language()
+        )
+        site_id = getattr(settings, "SITE_ID", None)
         languages = [language_code] + get_fallback_languages(
-            language_code, site_id=site_id)
+            language_code, site_id=site_id
+        )
 
         # Grab the first language that is common to our list of fallbacks and
         # the list of available languages for this object.
         if languages and object_languages:
             language_code = next(
-                (lang for lang in languages if lang in object_languages), None)
+                (lang for lang in languages if lang in object_languages), None
+            )
 
             if language_code:
-                value = self.safe_translation_getter(field,
-                                                     default=default, language_code=language_code)
+                value = self.safe_translation_getter(
+                    field, default=default, language_code=language_code
+                )
                 return value, language_code
 
         # No suitable translation exists

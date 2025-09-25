@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.urls import NoReverseMatch
@@ -58,4 +55,4 @@ class I18NSitemap(Sitemap):
             except NoReverseMatch:  # pragma: no cover
                 # Note, if we did our job right in items(), this
                 # shouldn't happen at all, but just in case...
-                return ''
+                return ""
