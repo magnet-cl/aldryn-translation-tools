@@ -2,6 +2,14 @@
 Changelog
 =========
 
+0.3.1-post2 (2025-09-25)
+====================
+
+* Added support for Django 5.2
+* Code reformatting using Ruff and remove Python 2.7 specific syntax.
+* Replaced `b` with `post` in versioning, since they're merely revisions to keep
+  compatibility.
+
 0.3.1b1 (2024-12-12)
 ====================
 
